@@ -1,0 +1,20 @@
+# Almost everything about a DeepDive app goes into this DDlog file
+# See: http://deepdive.stanford.edu/writing-dataflow-ddlog
+#
+# NLP Markup
+@source 
+sentences(
+    @key
+    @distributed_by
+    docid       text,
+    @key
+    sentid      int, 
+    @searchable
+    wordidx     int,
+    word        text,
+    poses       text, 
+    ners        text, 
+    lemmas      text, 
+    dep_paths   text, 
+    dep_parents int 
+).
