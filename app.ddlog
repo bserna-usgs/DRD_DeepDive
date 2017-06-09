@@ -19,16 +19,44 @@ sentences(
     dep_parents    int[] 
 ).
 
+## Initial testing... ######################################################
+#dam_presence(
+#    docid	   text,
+#    topic	   text
+#).
 
-dam_presence(
-    docid	   text,
-    topic	   text
+#function dam_pres over (docid text, sentid int)
+#	returns rows like dam_presence
+#	implementation "udf/n_presence.py" handles tsv lines.
+
+#dam_presence += dam_pres(docid, sentid) :-
+#	sentences(docid, sentid, _, _, _, _, _, _, _).
+
+## Candidate Noun mapping ##########################################################
+@extraction
+noun_mention(
+    @key
+    mention_id text,
+    @searchable
+    mention_text text,
+    @distributed_by
+    @references(relation="sentences", column="docid",         alias="appears_in")
+    docid text,
+    @references(relation="sentences", column="sentence_index", alias="appears_in")
+    sentid int,
+    begin_index int,
+    end_index int
 ).
 
+function map_noun_mention over (
+        docid text,
+        sentid int,
+        wordidx int[],
+        poses text[]
+    ) returns rows like noun_mention
+    implementation "udf/noun_presence.py" handles tsv lines.
 
-function dam_pres over (docid text, sentid int)
-	returns rows like dam_presence
-	implementation "udf/dam_presence.py" handles tsv lines.
+noun_mention += map_noun_mention(
+    docid, sentid, wordidx, poses
+) :- sentences(docid, sentid, wordidx, _, poses, _, _, _, _).
 
-dam_presence += dam_pres(docid, sentid) :-
-	sentences(docid, sentid, _, _, _, _, _, _, _).
