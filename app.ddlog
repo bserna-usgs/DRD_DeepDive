@@ -1,20 +1,34 @@
 # Almost everything about a DeepDive app goes into this DDlog file
 # See: http://deepdive.stanford.edu/writing-dataflow-ddlog
 #
-# NLP Markup
+## NLP Markup ####################
 @source 
 sentences(
     @key
     @distributed_by
-    docid       text,
+    docid          text,
     @key
-    sentid      int, 
+    sentid         int, 
     @searchable
-    wordidx     int,
-    word        text,
-    poses       text, 
-    ners        text, 
-    lemmas      text, 
-    dep_paths   text, 
-    dep_parents int 
+    wordidx        int[],
+    word           text[],
+    poses          text[],
+    ners           text[],
+    lemmas         text[],
+    dep_paths      text[],
+    dep_parents    int[] 
 ).
+
+
+dam_presence(
+    docid	   text,
+    topic	   text
+).
+
+
+function dam_pres over (docid text, sentid int)
+	returns rows like dam_presence
+	implementation "udf/dam_presence.py" handles tsv lines.
+
+dam_presence += dam_pres(docid, sentid) :-
+	sentences(docid, sentid, _, _, _, _, _, _, _).
